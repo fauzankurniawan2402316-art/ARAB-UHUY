@@ -9,9 +9,15 @@ import {
   RotateCcw,
   Sparkles,
   Edit3,
+  AlertCircle,
+  Film,
 } from 'lucide-react';
 import { VideoLesson, UserProgress } from '../types';
-import { getYoutubeEmbedUrl } from '../utils/helpers';
+import {
+  getYoutubeEmbedUrl,
+  getYoutubeWatchUrl,
+  isDirectVideoUrl,
+} from '../utils/helpers';
 import { useData } from '../context/DataContext';
 
 interface VideoPlayerProps {
@@ -26,7 +32,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onOpenAiTutor,
 }) => {
   const { userProgress, saveProgress, isBookmarked, toggleBookmark } = useData();
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const [isSaving, setIsSaving] = useState(false);
 
   const progress = userProgress[video.id] as UserProgress | undefined;
@@ -49,13 +54,28 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     }
   };
 
+  const isDirect = isDirectVideoUrl(video.youtubeUrl);
   const embedUrl = getYoutubeEmbedUrl(video.youtubeUrl);
+  const watchUrl = getYoutubeWatchUrl(video.youtubeUrl);
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
       {/* Video Viewport */}
-      <div className="relative aspect-video w-full bg-slate-950 overflow-hidden">
-        {embedUrl ? (
+      <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+        {isDirect ? (
+          /* HTML5 Video Player for direct files (.mp4, .webm, .ogg) */
+          <video
+            controls
+            playsInline
+            className="w-full h-full object-contain bg-black"
+            src={video.youtubeUrl}
+          >
+            <source src={video.youtubeUrl} type="video/mp4" />
+            <source src={video.youtubeUrl} type="video/webm" />
+            Browser Anda tidak mendukung pemutar video HTML5.
+          </video>
+        ) : embedUrl ? (
+          /* YouTube Embed Player with youtube-nocookie.com domain */
           <iframe
             src={embedUrl}
             title={video.title}
@@ -72,6 +92,28 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         )}
       </div>
 
+      {/* Fallback button for YouTube sandbox/browser policy */}
+      {!isDirect && watchUrl && (
+        <div className="bg-amber-50/80 border-b border-amber-200/80 px-5 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2 text-amber-900">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span>
+              Video tidak berputar karena kebijakan sandbox browser?
+            </span>
+          </div>
+
+          <a
+            href={watchUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition shadow-xs self-start sm:self-auto cursor-pointer"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Tonton di YouTube</span>
+          </a>
+        </div>
+      )}
+
       {/* Control & Action Bar */}
       <div className="p-5 sm:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -87,6 +129,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
                 {video.duration}
               </span>
+              {isDirect && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                  <Film className="w-3 h-3" />
+                  <span>HTML5 Video Langsung</span>
+                </span>
+              )}
             </div>
 
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">

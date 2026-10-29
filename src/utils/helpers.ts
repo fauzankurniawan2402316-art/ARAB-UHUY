@@ -1,41 +1,78 @@
 /**
- * Robustly extracts the 11-character YouTube video ID from various URL formats
- * (watch?v=, youtu.be/, embed/, shorts/, live/, or raw ID).
+ * Helper to extract YouTube Video ID from any standard link format:
+ * - youtu.be/VIDEO_ID
+ * - youtube.com/watch?v=VIDEO_ID
+ * - youtube.com/embed/VIDEO_ID
+ * - youtube-nocookie.com/embed/VIDEO_ID
+ * - youtube.com/shorts/VIDEO_ID
+ * - Raw 11-char ID
  */
 export function extractYoutubeVideoId(url: string): string | null {
   if (!url) return null;
   const trimmed = url.trim();
 
-  // If already a clean 11-character ID
+  // If already a clean 11-character video ID
   if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
     return trimmed;
   }
 
-  // Regex covering standard YouTube URL variations
-  const regExp = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = trimmed.match(regExp);
-  if (match && match[1]) {
-    return match[1];
+  // Check youtu.be/ID format
+  const youtuBeMatch = trimmed.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (youtuBeMatch && youtuBeMatch[1]) {
+    return youtuBeMatch[1];
   }
 
-  // Fallback query parameter check
-  const queryParamMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-  if (queryParamMatch && queryParamMatch[1]) {
-    return queryParamMatch[1];
+  // Check watch?v=ID format
+  const watchMatch = trimmed.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (watchMatch && watchMatch[1]) {
+    return watchMatch[1];
+  }
+
+  // Check embed/ID format (youtube.com or youtube-nocookie.com)
+  const embedMatch = trimmed.match(/(?:youtube(?:-nocookie)?\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  if (embedMatch && embedMatch[1]) {
+    return embedMatch[1];
+  }
+
+  // General regex covering remaining paths (shorts/ID, v/ID, live/ID)
+  const generalMatch = trimmed.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|shorts|live)\/))([a-zA-Z0-9_-]{11})/);
+  if (generalMatch && generalMatch[1]) {
+    return generalMatch[1];
   }
 
   return null;
 }
 
 /**
- * Converts any YouTube URL automatically to the standard embed format:
- * https://www.youtube.com/embed/VIDEO_ID
+ * Checks whether the URL is a direct video file (.mp4, .webm, .ogg)
+ */
+export function isDirectVideoUrl(url: string): boolean {
+  if (!url) return false;
+  const cleanUrl = url.trim().toLowerCase().split('?')[0];
+  return cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.ogg');
+}
+
+/**
+ * Converts any YouTube URL to the privacy-enhanced embed domain:
+ * https://www.youtube-nocookie.com/embed/VIDEO_ID
  */
 export function getYoutubeEmbedUrl(url: string): string {
   if (!url) return '';
   const videoId = extractYoutubeVideoId(url);
   if (videoId) {
-    return `https://www.youtube.com/embed/${videoId}`;
+    return `https://www.youtube-nocookie.com/embed/${videoId}`;
+  }
+  return url;
+}
+
+/**
+ * Returns standard YouTube watch URL for direct browser fallback
+ */
+export function getYoutubeWatchUrl(url: string): string {
+  if (!url) return '';
+  const videoId = extractYoutubeVideoId(url);
+  if (videoId) {
+    return `https://www.youtube.com/watch?v=${videoId}`;
   }
   return url;
 }
