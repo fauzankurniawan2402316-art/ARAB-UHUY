@@ -18,36 +18,47 @@ service cloud.firestore {
       );
     }
 
-    // Default deny
+    // Default deny catch-all: any unmatched path is strictly rejected
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Users collection
+    // Strict User-Isolated Data:
+    // Setiap user hanya memiliki izin membaca dan menulis datanya sendiri (Zero-Trust)
     match /users/{userId} {
+      // User hanya dapat membaca profil pribadinya sendiri, user lain dilarang
       allow get: if isOwner(userId) || isAdmin();
+      // Listing seluruh user hanya diizinkan untuk admin (mencegah scraping user data)
       allow list: if isAdmin();
+      // User hanya dapat membuat dan memperbarui datanya sendiri
       allow create, update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
+      // User atau admin dapat menghapus akunnya sendiri
+      allow delete: if isOwner(userId) || isAdmin();
 
-      // Progress subcollection
+      // Subkoleksi progres belajar menyimak per video (hanya user pemilik yang bisa baca/tulis)
       match /progress/{videoId} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
 
-      // Notes subcollection
+      // Subkoleksi catatan istima' pribadi (hanya user pemilik yang bisa baca/tulis)
       match /notes/{noteId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Seluruh subkoleksi turunan user lainnya terproteksi ketat hanya untuk pemiliknya
+      match /{allSubcollections=**} {
         allow read, write: if isOwner(userId) || isAdmin();
       }
     }
 
-    // Videos collection
+    // Koleksi Materi Video Animasi Pembelajaran
+    // Siswa terautentikasi dapat membaca materi, hanya admin yang dapat menambah/mengedit/menghapus
     match /videos/{videoId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
-    // Admins registry
+    // Daftar Admin Terpercaya
     match /admins/{adminId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
