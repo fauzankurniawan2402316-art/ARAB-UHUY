@@ -16,6 +16,7 @@ import {
 import { VideoLesson, DialogueLine, VocabularyItem, QuizQuestion } from '../types';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
+import { getYoutubeEmbedUrl } from '../utils/helpers';
 
 export const AdminPanel: React.FC = () => {
   const { videos, addVideo, updateVideo, deleteVideo } = useData();
@@ -451,6 +452,14 @@ export const AdminPanel: React.FC = () => {
                 placeholder="https://www.youtube.com/watch?v=..."
                 className="w-full bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
               />
+              {youtubeUrl && (
+                <div className="mt-2 text-[11px] text-slate-500">
+                  <span className="font-semibold text-indigo-700">Embed URL: </span>
+                  <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[10px] break-all">
+                    {getYoutubeEmbedUrl(youtubeUrl)}
+                  </code>
+                </div>
+              )}
             </div>
 
             <div>

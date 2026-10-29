@@ -60,8 +60,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             src={embedUrl}
             title={video.title}
             className="w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 p-6 text-center">
