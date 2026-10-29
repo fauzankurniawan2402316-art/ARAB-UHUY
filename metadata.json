@@ -1,0 +1,6 @@
+{
+  "name": "Koleksi Animasi Maharah Istima' - Pembelajaran Bahasa Arab",
+  "description": "Aplikasi pembelajaran bahasa Arab interaktif untuk mengasah keterampilan mendengar (Maharah Istima') dengan video animasi edukatif, transkrip berharakat, kuis interaktif, dan tutor AI cerdas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

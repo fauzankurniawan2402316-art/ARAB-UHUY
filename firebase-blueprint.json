@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Unique user ID" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Display name" },
+        "role": { "type": "string", "description": "User role: student or admin" },
+        "createdAt": { "type": "string", "description": "Account creation timestamp" },
+        "lastLoginAt": { "type": "string", "description": "Last login timestamp" }
+      },
+      "required": ["userId", "email", "role"]
+    },
+    "Video": {
+      "title": "Video",
+      "description": "Animated Arabic learning video metadata, transcript, and quiz",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Video title" },
+        "titleArabic": { "type": "string", "description": "Arabic title" },
+        "titleIndo": { "type": "string", "description": "Indonesian title" },
+        "description": { "type": "string", "description": "Description" },
+        "category": { "type": "string", "description": "Category or topic" },
+        "level": { "type": "string", "description": "Difficulty level" },
+        "youtubeUrl": { "type": "string", "description": "YouTube or embed video URL" },
+        "duration": { "type": "string", "description": "Duration string" },
+        "thumbnailUrl": { "type": "string", "description": "Thumbnail image URL" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["title", "category", "level", "youtubeUrl"]
+    },
+    "UserProgress": {
+      "title": "UserProgress",
+      "description": "User listening progress and quiz results for a video",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "User ID" },
+        "videoId": { "type": "string", "description": "Video ID" },
+        "completed": { "type": "boolean", "description": "Whether video has been completed" },
+        "quizScore": { "type": "number", "description": "Quiz score achieved" },
+        "quizCompleted": { "type": "boolean", "description": "Quiz completion status" },
+        "updatedAt": { "type": "string", "description": "Timestamp of last update" }
+      },
+      "required": ["userId", "videoId", "completed"]
+    },
+    "UserNote": {
+      "title": "UserNote",
+      "description": "Personal student learning note for an istima video",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "User ID" },
+        "videoId": { "type": "string", "description": "Video ID" },
+        "content": { "type": "string", "description": "Content of the note" },
+        "createdAt": { "type": "string", "description": "Timestamp created" }
+      },
+      "required": ["userId", "videoId", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile collection"
+    },
+    "/videos/{videoId}": {
+      "schema": "Video",
+      "description": "Curated Arabic learning animation videos"
+    },
+    "/users/{userId}/progress/{videoId}": {
+      "schema": "UserProgress",
+      "description": "User listening and quiz progress"
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": "UserNote",
+      "description": "User personal learning notes"
+    }
+  }
+}
